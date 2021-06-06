@@ -5,11 +5,8 @@ using namespace std;
 LedStrip::LedStrip()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(m_leds, NB_LEDS);
-    m_effect_breath_last_exec_time = millis();
-    m_effect_breath_iteration = 0;
-    m_effect_breath_delay = 30;
-
     m_is_animation_running = false;
+    m_current_animation = CURRENT_ANIMATION_NONE;
 }
 
 
@@ -30,31 +27,45 @@ void LedStrip::set_color_from_aqi(int aqi) {
     else                { set_color(255,255,255); }
 }
 
-void LedStrip::set_effect_breath()
-{
-    // https://arduinoelectronics.wordpress.com/2015/05/12/non-blocking-breathing-led/
-    
-    if( (m_effect_breath_last_exec_time + m_effect_breath_delay) < millis() ){
-        m_effect_breath_last_exec_time = millis();
-        
-        float val = (exp(sin(m_effect_breath_iteration/2000.0*PI*10)) - 0.36787944)*108.0; // this is the math function recreating the effect
-        
-        //analogWrite(ledPin, val);  // PWM
-        FastLED.setBrightness(val);
-        FastLED.show();
 
-        m_effect_breath_iteration = m_effect_breath_iteration + 1;
+bool LedStrip::set_breathing_animation(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration, unsigned long animation_duration_low_static){
+    if (!m_is_animation_running || m_current_animation != CURRENT_ANIMATION_BREATHING) {
+        Serial.println("[LEDStrip] Start breathing effect");
+        m_is_animation_running = true;
+        m_current_animation = CURRENT_ANIMATION_BREATHING;
+        m_animation_start_time = millis();
     }
+
+    unsigned long animation_time = millis() - m_animation_start_time;
+
+    if(animation_time < animation_duration){
+        int animation_percent = map(animation_time, 0, animation_duration, 0, 100);
+        int brightness_target = (brightness_max - brightness_min) * exp( (-1.0 * sq(animation_percent - 50.0)) / (2.0 * sq(20.0))) + brightness_min;
+
+        for(int i = 0; i<NB_LEDS; i++){
+            m_leds[i].setHSV(hsv.hue, hsv.saturation, brightness_target);
+        }
+
+        FastLED.show();
+    }
+    
+    if (millis() > m_animation_start_time + animation_duration + animation_duration_low_static) {
+        m_is_animation_running = false;
+        m_current_animation = CURRENT_ANIMATION_NONE;
+        Serial.println("[LedStrip] End breathing animation");
+        return true;
+    } else {
+        return false;
+    }        
 }
 
-void LedStrip::set_effect_breathing_delay (int delay) { m_effect_breath_delay = delay; }
 
+bool LedStrip::set_spinning_animation(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration) {
 
-bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration) {
-
-    if (!m_is_animation_running) {
+    if (!m_is_animation_running || m_current_animation != CURRENT_ANIMATION_SPINNING) {
         Serial.println("[LEDStrip] Start spinning");
         m_is_animation_running = true;
+        m_current_animation = CURRENT_ANIMATION_SPINNING;
         m_animation_start_time = millis();
         animation_spinning_set_array(hsv, brightness_min, brightness_max);
     }
@@ -73,6 +84,7 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
 
     if (millis() > m_animation_start_time + animation_duration) {
         m_is_animation_running = false;
+        m_current_animation = CURRENT_ANIMATION_NONE;
         Serial.println("[LedStrip] End spinning");
         return true;
     } else {
@@ -88,7 +100,7 @@ void LedStrip::animation_spinning_set_array(CHSV hsv, uint8_t brightness_min, ui
         uint8_t pixel_position_percent = map(i, 0, NB_LEDS-1, 0, 100);
         uint8_t brightness_diff = brightness_max - brightness_min;
 
-        // This function is used to draw the spinning effect (can be linear or not)
+        // This function is used to draw the spinning seed (can be linear or not)
         // f([0 ; 100]) = [0 ; 100]
         // Also : f(0) = 0 and f(100) = 0
         float brightness_diff_percent = abs(100*sin(pixel_position_percent/31.830989));
