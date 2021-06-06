@@ -17,13 +17,20 @@ class LedStrip {
         void set_color_from_aqi(int aqi);
         void set_effect_breathing_delay(int delay);
         void set_effect_breath();
+        bool set_spinning_effect(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness, long animation_duration);
+        void set_spinning_array(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness);
 
     private:
-        CRGB m_leds[10];
+        CRGB m_leds[NB_LEDS];
         unsigned long m_effect_breath_last_exec_time;
         unsigned long m_effect_breath_iteration;
         int m_effect_breath_delay;
-        
+        bool m_is_animation_running;
+        long m_animation_start_time;
+        uint8_t m_spinning_seed[NB_LEDS];
+        String m_spinning_action[NB_LEDS];
+        uint8_t m_spinning_max_reached[NB_LEDS];
+        uint8_t m_spinning_min_reached[NB_LEDS];
 };
 
 #endif
