@@ -4,16 +4,15 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include <math.h>
+#include <config/config.h>
 
-const int DATA_PIN = 3;
-const int NB_LEDS = 10;
-const uint8_t ANIMATION_SPIN_STATE_SUBSTRACT_FROM_SEED = 0;
-const uint8_t ANIMATION_SPIN_STATE_SUBSTRACT = 1;
-const uint8_t ANIMATION_SPIN_STATE_ADD_FROM_SEED = 2;
-const uint8_t ANIMATION_SPIN_STATE_ADD = 3;
-const uint8_t CURRENT_ANIMATION_NONE = 0;
-const uint8_t CURRENT_ANIMATION_SPINNING = 1;
-const uint8_t CURRENT_ANIMATION_BREATHING = 2;
+#define ANIMATION_SPIN_STATE_SUBSTRACT_FROM_SEED 0
+#define ANIMATION_SPIN_STATE_SUBSTRACT 1
+#define ANIMATION_SPIN_STATE_ADD_FROM_SEED 2
+#define ANIMATION_SPIN_STATE_ADD 3
+#define CURRENT_ANIMATION_NONE 0
+#define CURRENT_ANIMATION_SPINNING 1
+#define CURRENT_ANIMATION_BREATHING 2
 
 class LedStrip {
     public:

@@ -3,7 +3,6 @@
 
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h> //https://lastminuteengineers.com/bme280-arduino-tutorial/
-#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
 
 class SensorBME280 {
     public:

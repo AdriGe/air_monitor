@@ -4,9 +4,26 @@ using namespace std;
 
 LedStrip::LedStrip()
 {
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(m_leds, NB_LEDS);
+    FastLED.addLeds<NEOPIXEL, LED_STRIP_DATA_PIN>(m_leds, NB_LEDS);
     m_is_animation_running = false;
     m_current_animation = CURRENT_ANIMATION_NONE;
+}
+
+
+void LedStrip::set_color(CRGB rgb) {
+    for(int i = 0; i<NB_LEDS; i++) {
+        m_leds[i].setRGB(rgb.red, rgb.green, rgb.blue);
+    }
+
+    FastLED.show();
+}
+
+void LedStrip::set_color(uint8_t red, uint8_t green, uint8_t blue) {
+    for(int i = 0; i<NB_LEDS; i++) {
+        m_leds[i].setRGB(red, green, blue);
+    }
+
+    FastLED.show();
 }
 
 

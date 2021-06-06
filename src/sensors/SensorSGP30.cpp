@@ -2,8 +2,6 @@
 
 using namespace std;
 
-const int JSON_BUFFER_CAPACITY = 20;
-
 SensorSGP30::SensorSGP30(int measure_interval){
     m_measure_interval = measure_interval;
 

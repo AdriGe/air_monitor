@@ -3,7 +3,6 @@
 
 #include <DallasTemperature.h>
 #include <Wire.h>
-#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
 
 class SensorDS18B20 {
     public:

@@ -3,12 +3,7 @@
 
 #include <SoftwareSerial.h>
 #include <PMS.h>
-#include <ArduinoJson.h>                    // https://github.com/bblanchon/ArduinoJson
-
-// PMS_READ_INTERVAL (4:30 min) and PMS_READ_DELAY (30 sec) CAN'T BE EQUAL! Values are also used to detect sensor state.
-static const uint32_t PMS_READ_INTERVAL = 2000;
-static const uint32_t PMS_READ_DELAY = 3000;
-
+#include <config/config.h>
 class SensorPMSA003 {
     public:
         SensorPMSA003(int pin_tx, int pin_rx, int measure_interval);

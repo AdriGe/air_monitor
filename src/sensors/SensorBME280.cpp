@@ -1,7 +1,5 @@
 #include <sensors/SensorBME280.h>
 
-const int JSON_BUFFER_CAPACITY = 20;
-
 SensorBME280::SensorBME280(int i2c_address, int measure_interval){
     m_i2c_address = i2c_address;
     m_measure_interval = measure_interval;

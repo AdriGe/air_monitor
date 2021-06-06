@@ -25,8 +25,9 @@ EasyWifiManager easy_wifi_manager;
 EasyMqttManager* easy_mqtt_manager;
 EasyWebServer easy_web_server(80, &easy_wifi_manager, &all_sensors);
 
-LedStrip led_strip;
 Oled oled;
+LedStrip led_strip;
+
 
 
 void setup() {
@@ -74,7 +75,7 @@ void loop() {
     if (is_new_sensor_values) {
         // Setting LED Strip color
         int aqi = all_sensors.get_aqi();
-        led_strip.set_color_from_aqi(aqi);
+        //led_strip.set_color_from_aqi(aqi);
     }
 
     // Handle MQTT
@@ -88,5 +89,4 @@ void loop() {
 
         mqtt_last_publish_time = millis();
     }
-
 }

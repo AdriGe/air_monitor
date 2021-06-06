@@ -2,8 +2,6 @@
 
 using namespace std;
 
-const int JSON_BUFFER_CAPACITY = 200;
-
 SensorDS18B20::SensorDS18B20(int pin, int measure_interval){
     m_pin = pin;
     m_measure_interval = measure_interval;
