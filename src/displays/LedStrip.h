@@ -31,6 +31,11 @@ class LedStrip {
         String m_spinning_action[NB_LEDS];
         uint8_t m_spinning_max_reached[NB_LEDS];
         uint8_t m_spinning_min_reached[NB_LEDS];
+
+        uint8_t animation_spinning_substract_from_seed(uint8_t current_pixel, uint8_t current_index);
+        uint8_t animation_spinning_add_from_seed(uint8_t current_pixel, uint8_t current_index);
+        uint8_t animation_spinning_substract(uint8_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
+        uint8_t animation_spinning_add(uint8_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
 };
 
 #endif

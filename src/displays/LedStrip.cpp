@@ -78,10 +78,8 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
     for(int i = 0; i<NB_LEDS; i++){
 
         if(m_spinning_action[i] == "substract_from_seed") {
-            //Serial.print("*-");
 
             if(m_spinning_seed[i] - (2*matching_index) < brightness_min){
-                //Serial.print("+");
                 m_spinning_action[i] = "add";
                 int index_min_reached;
 
@@ -92,15 +90,11 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
                 }
 
                 m_spinning_min_reached[i] = index_min_reached;
-            } else {
-                //Serial.print(" ");
             }
 
         } else if(m_spinning_action[i] == "add_from_seed"){
-           // Serial.print("*+");
 
             if(m_spinning_seed[i] + (2*matching_index) > brightness_max){
-                //Serial.print("-");
                 m_spinning_action[i] = "substract";
 
                 int index_max_reached;
@@ -111,15 +105,11 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
                     index_max_reached = matching_index - 1;
                 }
                 m_spinning_max_reached[i] = index_max_reached;
-            } else {
-                //Serial.print(" ");
             }
 
         } else if(m_spinning_action[i] == "substract") {
-            //Serial.print(" -");
 
             if(brightness_max - ( 2 * ( matching_index - m_spinning_max_reached[i] ) ) < brightness_min) {
-                //Serial.print("+");
                 m_spinning_action[i] = "add";
 
                 int index_min_reached;
@@ -130,15 +120,11 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
                     index_min_reached = matching_index - 1;
                 }
                 m_spinning_min_reached[i] = index_min_reached;
-            } else {
-                //Serial.print(" ");
             }
 
         } else if(m_spinning_action[i] == "add") {
-            //Serial.print(" +");
 
             if(brightness_min + ( 2 * ( matching_index - m_spinning_min_reached[i] ) ) > brightness_max) {
-                //Serial.print("-");
                 m_spinning_action[i] = "substract";
 
                 int index_max_reached;
@@ -149,13 +135,8 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
                     index_max_reached = matching_index - 1;
                 }
                 m_spinning_max_reached[i] = index_max_reached;
-            } else {
-                //Serial.print(" ");
             }
-
         }
-
-        //Serial.print("|  ");
 
         int brightness_target;
 
@@ -172,14 +153,8 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
             brightness_target = brightness_min + ( 2 * ( matching_index - m_spinning_min_reached[i] ) );
         } 
 
-        Serial.print(brightness_target);
-        Serial.print(";");
-
         m_leds[i].setHSV(hsv.hue, hsv.saturation, brightness_target);
     }
-
-
-    Serial.println("");
 
     FastLED.show();
 
@@ -218,4 +193,21 @@ void LedStrip::set_spinning_array(CHSV hsv, uint8_t brightness_min, uint8_t brig
             m_spinning_action[i]="add_from_seed";
         }
     }
+}
+
+
+uint8_t LedStrip::animation_spinning_substract_from_seed(uint8_t current_pixel, uint8_t current_index) {
+    return m_spinning_seed[current_pixel] - (2*current_index);
+}
+
+uint8_t LedStrip::animation_spinning_add_from_seed(uint8_t current_pixel, uint8_t current_index) {
+    return m_spinning_seed[current_pixel] + (2*current_index);
+}
+
+uint8_t LedStrip::animation_spinning_substract(uint8_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
+    return brightness_max - ( 2 * ( current_index - m_spinning_max_reached[current_pixel] ) );
+}
+
+uint8_t LedStrip::animation_spinning_add(uint8_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
+    return brightness_min + ( 2 * ( current_index - m_spinning_min_reached[current_pixel] ) );
 }
