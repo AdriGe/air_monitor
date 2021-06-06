@@ -50,7 +50,7 @@ void LedStrip::set_effect_breath()
 void LedStrip::set_effect_breathing_delay (int delay) { m_effect_breath_delay = delay; }
 
 
-bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, long animation_duration) {
+bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration) {
 
     if (!m_is_animation_running) {
         Serial.println("[LEDStrip] Start spinning");
@@ -60,98 +60,65 @@ bool LedStrip::set_spinning_effect(CHSV hsv, uint8_t brightness_min, uint8_t bri
     }
 
     int brightness_difference = brightness_max - brightness_min;
-    long animation_time = millis() - m_animation_start_time;
-
+    unsigned long animation_time = millis() - m_animation_start_time;
     int animation_percent = map(animation_time, 0, animation_duration, 0, 100);
-    //int brightness_offset = map(animation_percent, 0, 100, 0, brightness_max - brightness_min)/2;
     int matching_index = map(animation_percent, 0, 100, 0, brightness_difference-1);
-    int center_index = (NB_LEDS/2) - 1;
-
-
-    Serial.print(animation_time);
-    Serial.print("ms (");
-    Serial.print(animation_percent);
-    Serial.print("%) -> i = ");
-    Serial.print(matching_index);
-    Serial.print(" |");
 
     for(int i = 0; i<NB_LEDS; i++){
 
-        if(m_spinning_action[i] == "substract_from_seed") {
+        if(m_spinning_action[i] == ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED) {
 
-            if(m_spinning_seed[i] - (2*matching_index) < brightness_min){
-                m_spinning_action[i] = "add";
-                int index_min_reached;
-
-                if(matching_index-1 < 0) {
-                    index_min_reached = 0;
-                } else {
-                    index_min_reached = matching_index - 1 ;
-                }
-
-                m_spinning_min_reached[i] = index_min_reached;
+            if(animation_spinning_substract_from_seed(i, matching_index) < brightness_min){
+                m_spinning_action[i] = ANIMATION_SPINNING_STATE_ADD;
+                animation_spinning_set_min_max_index(i, matching_index);
             }
 
-        } else if(m_spinning_action[i] == "add_from_seed"){
+        } else if(m_spinning_action[i] == ANIMATION_SPINNING_STATE_ADD_FROM_SEED){
 
-            if(m_spinning_seed[i] + (2*matching_index) > brightness_max){
-                m_spinning_action[i] = "substract";
-
-                int index_max_reached;
-
-                if(matching_index - 1 < 0){
-                    index_max_reached = 0;
-                } else {
-                    index_max_reached = matching_index - 1;
-                }
-                m_spinning_max_reached[i] = index_max_reached;
+            if(animation_spinning_add_from_seed(i, matching_index) > brightness_max){
+                m_spinning_action[i] = ANIMATION_SPINNING_STATE_SUBSTRACT;
+                animation_spinning_set_min_max_index(i, matching_index);
             }
 
-        } else if(m_spinning_action[i] == "substract") {
+        } else if(m_spinning_action[i] == ANIMATION_SPINNING_STATE_SUBSTRACT) {
 
-            if(brightness_max - ( 2 * ( matching_index - m_spinning_max_reached[i] ) ) < brightness_min) {
-                m_spinning_action[i] = "add";
-
-                int index_min_reached;
-
-                if(matching_index - 1 <0){
-                    index_min_reached = 0;
-                } else {
-                    index_min_reached = matching_index - 1;
-                }
-                m_spinning_min_reached[i] = index_min_reached;
+            if(animation_spinning_substract(i, matching_index, brightness_min, brightness_max) < brightness_min) {
+                m_spinning_action[i] = ANIMATION_SPINNING_STATE_ADD;
+                animation_spinning_set_min_max_index(i, matching_index);
             }
 
-        } else if(m_spinning_action[i] == "add") {
+        } else if(m_spinning_action[i] == ANIMATION_SPINNING_STATE_ADD) {
 
-            if(brightness_min + ( 2 * ( matching_index - m_spinning_min_reached[i] ) ) > brightness_max) {
-                m_spinning_action[i] = "substract";
-
-                int index_max_reached;
-
-                if(matching_index - 1 < 0){
-                    index_max_reached = 0;
-                } else {
-                    index_max_reached = matching_index - 1;
-                }
-                m_spinning_max_reached[i] = index_max_reached;
+            if(animation_spinning_add(i, matching_index, brightness_min, brightness_max) > brightness_max) {
+                m_spinning_action[i] = ANIMATION_SPINNING_STATE_SUBSTRACT;
+                animation_spinning_set_min_max_index(i, matching_index);
             }
         }
 
         int brightness_target;
 
-        if(m_spinning_action[i] == "substract_from_seed") {
-            brightness_target = m_spinning_seed[i] - (2*matching_index);
+        switch (m_spinning_action[i])
+        {
+            case ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED:
+                brightness_target = animation_spinning_substract_from_seed(i, matching_index);
+                break;
 
-        } else if(m_spinning_action[i] == "add_from_seed") {
-            brightness_target = m_spinning_seed[i] + (2*matching_index);
+            case ANIMATION_SPINNING_STATE_ADD_FROM_SEED:
+                brightness_target = animation_spinning_add_from_seed(i, matching_index);
+                break;
 
-        } else if(m_spinning_action[i] == "substract") {
-            brightness_target = brightness_max - ( 2 * ( matching_index - m_spinning_max_reached[i] ) );
+            case ANIMATION_SPINNING_STATE_SUBSTRACT:
+                brightness_target = animation_spinning_substract(i, matching_index, brightness_min, brightness_max);
+                break;
 
-        } else if(m_spinning_action[i] == "add") {
-            brightness_target = brightness_min + ( 2 * ( matching_index - m_spinning_min_reached[i] ) );
-        } 
+            case ANIMATION_SPINNING_STATE_ADD:
+                brightness_target = animation_spinning_add(i, matching_index, brightness_min, brightness_max);
+                break;
+
+            default:
+                brightness_target = 0;
+                break;
+        }
 
         m_leds[i].setHSV(hsv.hue, hsv.saturation, brightness_target);
     }
@@ -188,26 +155,44 @@ void LedStrip::set_spinning_array(CHSV hsv, uint8_t brightness_min, uint8_t brig
         m_spinning_seed[i] = pixel_brightness;
 
         if(i<=center_index) {
-            m_spinning_action[i]="substract_from_seed";
+            m_spinning_action[i] = ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED;
         } else {
-            m_spinning_action[i]="add_from_seed";
+            m_spinning_action[i] = ANIMATION_SPINNING_STATE_ADD_FROM_SEED;
         }
     }
 }
 
 
-uint8_t LedStrip::animation_spinning_substract_from_seed(uint8_t current_pixel, uint8_t current_index) {
+uint16_t LedStrip::animation_spinning_substract_from_seed(uint16_t current_pixel, uint8_t current_index) {
     return m_spinning_seed[current_pixel] - (2*current_index);
 }
 
-uint8_t LedStrip::animation_spinning_add_from_seed(uint8_t current_pixel, uint8_t current_index) {
+uint16_t LedStrip::animation_spinning_add_from_seed(uint16_t current_pixel, uint8_t current_index) {
     return m_spinning_seed[current_pixel] + (2*current_index);
 }
 
-uint8_t LedStrip::animation_spinning_substract(uint8_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
-    return brightness_max - ( 2 * ( current_index - m_spinning_max_reached[current_pixel] ) );
+uint16_t LedStrip::animation_spinning_substract(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
+    return brightness_max - ( 2 * ( current_index - m_spinning_min_max_index[current_pixel] ) );
 }
 
-uint8_t LedStrip::animation_spinning_add(uint8_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
-    return brightness_min + ( 2 * ( current_index - m_spinning_min_reached[current_pixel] ) );
+uint16_t LedStrip::animation_spinning_add(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
+    return brightness_min + ( 2 * ( current_index - m_spinning_min_max_index[current_pixel] ) );
+}
+
+void LedStrip::animation_spinning_set_min_max_index(uint16_t current_pixel, uint8_t current_index){
+    if(current_index - 1 < 0){
+        m_spinning_min_max_index[current_pixel] = 0;
+    } else {
+        m_spinning_min_max_index[current_pixel] = current_index - 1;
+    }
+}
+
+
+void LedStrip::animation_spinning_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
+
+}
+
+
+void LedStrip::animation_spinning_set_pixel_color(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
+
 }
