@@ -134,8 +134,6 @@ bool Oled::translateLeft(char* str, uint16_t enter_duration, uint16_t static_dur
 
 
 void Oled::enterLeft(char* str, uint16_t enter_duration) {
-    Serial.println("[Oled] Enter -> ");
-
     long animation_time = millis() - m_animation_start_time;
     int x_start_position = m_screen_width;
     int x_final_position = (m_screen_width - m_p_u8g2->getStrWidth(str)) / 2;
@@ -153,29 +151,12 @@ void Oled::enterLeft(char* str, uint16_t enter_duration) {
 
     // Map the percentage positition with the corresponding value on the screen
     long x_position_value = Arduino_h::map(percent_animation_position, 0, 100, x_start_position, x_final_position);
-
-    //Serial.print(str);
-    //Serial.print(" ---> ");
-    //Serial.print(x_start_position);
-    //Serial.print(";");
-    //Serial.print(x_final_position);
-    //Serial.print(";");
-    //Serial.print(animation_time);
-    //Serial.print(";");
-    //Serial.print(percent_animation_time);
-    //Serial.print(";");
-    //Serial.print(percent_animation_position);
-    //Serial.print(";");
-    //Serial.println(x_position_value);
-
     
     drawStr(x_position_value, y_position_center, str);
 }
 
 
 void Oled::exitLeft(char* str, uint16_t enter_duration, uint16_t static_duration, uint16_t exit_duration) {
-    Serial.println("[Oled] Exit -> ");
-
     long animation_time = millis() - m_animation_start_time - enter_duration - static_duration;
     int x_start_position = (m_screen_width - m_p_u8g2->getStrWidth(str)) / 2;
     int x_final_position = -(m_p_u8g2->getStrWidth(str) + 10); //Add 10 because getStrWidth is not precise
@@ -186,18 +167,6 @@ void Oled::exitLeft(char* str, uint16_t enter_duration, uint16_t static_duration
 
     // Map the percentage of time elapsed with the corresponding value on the screen
     long x_position_value = Arduino_h::map(percent_animation_time, 0, 100, x_start_position, x_final_position);
-
-    //Serial.print(str);
-    //Serial.print(" ---> ");
-    //Serial.print(x_start_position);
-    //Serial.print(";");
-    //Serial.print(x_final_position);
-    //Serial.print(";");
-    //Serial.print(animation_time);
-    //Serial.print(";");
-    //Serial.print(percent_animation_time);
-    //Serial.print(";");
-    //Serial.println(x_position_value);
 
     drawStr(x_position_value, y_position_center, str);
 }
