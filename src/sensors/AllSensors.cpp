@@ -56,6 +56,7 @@ bool AllSensors::read() {
     }
 }
 
+
 void AllSensors::handleFifo(uint16_t new_sensor_value, vector<uint16_t>* p_value_fifo) {
     //Keep fixed number of values in vectors
     if (p_value_fifo->size() == m_mean_nb_points) {
@@ -64,6 +65,7 @@ void AllSensors::handleFifo(uint16_t new_sensor_value, vector<uint16_t>* p_value
 
     p_value_fifo->push_back(new_sensor_value);
 }
+
 
 uint16_t AllSensors::get_pm_1_0() { return m_p_pmsa003->get_pm_1_0(); }
 uint16_t AllSensors::get_pm_2_5() { return m_p_pmsa003->get_pm_2_5(); }
@@ -74,6 +76,7 @@ uint16_t AllSensors::get_temperature() { return m_p_bme280->get_temperature(); }
 uint16_t AllSensors::get_humidity() { return m_p_bme280->get_humidity(); }
 uint16_t AllSensors::get_pressure() { return m_p_bme280->get_pressure(); }
 
+
 uint16_t AllSensors::get_mean_pm_1_0() { return accumulate(m_vector_pm_1_0.begin(), m_vector_pm_1_0.end(), 0)/m_mean_nb_points; }
 uint16_t AllSensors::get_mean_pm_2_5() { return accumulate(m_vector_pm_2_5.begin(), m_vector_pm_2_5.end(), 0)/m_mean_nb_points; }
 uint16_t AllSensors::get_mean_pm_10_0() { return accumulate(m_vector_pm_10_0.begin(), m_vector_pm_10_0.end(), 0)/m_mean_nb_points; }
@@ -83,14 +86,50 @@ uint16_t AllSensors::get_mean_temperature() { return accumulate(m_vector_tempera
 uint16_t AllSensors::get_mean_humidity() { return accumulate(m_vector_humidity.begin(), m_vector_humidity.end(), 0)/m_mean_nb_points; }
 uint16_t AllSensors::get_mean_pressure() { return accumulate(m_vector_pressure.begin(), m_vector_pressure.end(), 0)/m_mean_nb_points; }
 
+
 uint16_t AllSensors::get_aqi() {
+    uint16_t pm_2_5 = get_mean_pm_2_5();
     uint16_t pm_10_0 = get_mean_pm_10_0();
 
-    if      (pm_10_0 > 180)  { return 5; }
-    else if (pm_10_0 >  90)  { return 4; }
-    else if (pm_10_0 >  50)  { return 3; }
-    else if (pm_10_0 >  25)  { return 2; }
-    else                     { return 1; }
+    uint16_t aqi_pm_2_5 = get_aqi_pm_2_5(pm_2_5);
+    uint16_t aqi_pm_10_0 = get_aqi_pm_10_0(pm_10_0);
+
+    //Return worst AQI
+    if (aqi_pm_2_5>aqi_pm_10_0){
+        return aqi_pm_2_5;
+    } else {
+        return aqi_pm_10_0;
+    }
+}
+
+
+uint16_t AllSensors::get_aqi_pm_2_5(uint16_t pm_2_5){
+    if(pm_2_5>PM_2_5_VERY_HIGH_MIN) {
+        return map(pm_2_5, PM_2_5_VERY_HIGH_MIN, PM_2_5_VERY_HIGH_MAX, AQI_VERY_HIGH_MIN, AQI_VERY_HIGH_MAX);
+    } else if(pm_2_5>PM_2_5_HIGH_MIN) {
+        return map(pm_2_5, PM_2_5_HIGH_MIN, PM_2_5_HIGH_MAX, AQI_HIGH_MIN, AQI_HIGH_MAX);
+    } else if(pm_2_5>PM_2_5_MEDIUM_MIN) {
+        return map(pm_2_5, PM_2_5_MEDIUM_MIN, PM_2_5_MEDIUM_MAX, AQI_MEDIUM_MIN, AQI_MEDIUM_MAX);
+    } else if(pm_2_5>PM_2_5_LOW_MIN) {
+        return map(pm_2_5, PM_2_5_LOW_MIN, PM_2_5_LOW_MAX, AQI_LOW_MIN, AQI_LOW_MAX);
+    } else {
+        return map(pm_2_5, PM_2_5_VERY_LOW_MIN, PM_2_5_VERY_LOW_MAX, AQI_VERY_LOW_MIN, AQI_VERY_LOW_MAX);
+    }
+}
+
+
+uint16_t AllSensors::get_aqi_pm_10_0(uint16_t pm_10_0){
+    if(pm_10_0>PM_10_0_VERY_HIGH_MIN) {
+        return map(pm_10_0, PM_10_0_VERY_HIGH_MIN, PM_10_0_VERY_HIGH_MAX, AQI_VERY_HIGH_MIN, AQI_VERY_HIGH_MAX);
+    } else if(pm_10_0>PM_10_0_HIGH_MIN) {
+        return map(pm_10_0, PM_10_0_HIGH_MIN, PM_10_0_HIGH_MAX, AQI_HIGH_MIN, AQI_HIGH_MAX);
+    } else if(pm_10_0>PM_10_0_MEDIUM_MIN) {
+        return map(pm_10_0, PM_10_0_MEDIUM_MIN, PM_10_0_MEDIUM_MAX, AQI_MEDIUM_MIN, AQI_MEDIUM_MAX);
+    } else if(pm_10_0>PM_10_0_LOW_MIN) {
+        return map(pm_10_0, PM_10_0_LOW_MIN, PM_10_0_LOW_MAX, AQI_LOW_MIN, AQI_LOW_MAX);
+    } else {
+        return map(pm_10_0, PM_10_0_VERY_LOW_MIN, PM_10_0_VERY_LOW_MAX, AQI_VERY_LOW_MIN, AQI_VERY_LOW_MAX);
+    }
 }
 
 
