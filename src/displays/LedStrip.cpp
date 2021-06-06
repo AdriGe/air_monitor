@@ -28,9 +28,9 @@ void LedStrip::set_color_from_aqi(int aqi) {
 }
 
 
-bool LedStrip::set_breathing_animation(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration, unsigned long animation_duration_low_static){
+bool LedStrip::set_animation_breath(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration, unsigned long animation_duration_low_static){
     if (!m_is_animation_running || m_current_animation != CURRENT_ANIMATION_BREATHING) {
-        Serial.println("[LEDStrip] Start breathing effect");
+        Serial.println("[LEDStrip] Start animation (Breath)");
         m_is_animation_running = true;
         m_current_animation = CURRENT_ANIMATION_BREATHING;
         m_animation_start_time = millis();
@@ -52,7 +52,7 @@ bool LedStrip::set_breathing_animation(CHSV hsv, uint8_t brightness_min, uint8_t
     if (millis() > m_animation_start_time + animation_duration + animation_duration_low_static) {
         m_is_animation_running = false;
         m_current_animation = CURRENT_ANIMATION_NONE;
-        Serial.println("[LedStrip] End breathing animation");
+        Serial.println("[LedStrip] End animation (Breath)");
         return true;
     } else {
         return false;
@@ -60,14 +60,14 @@ bool LedStrip::set_breathing_animation(CHSV hsv, uint8_t brightness_min, uint8_t
 }
 
 
-bool LedStrip::set_spinning_animation(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration) {
+bool LedStrip::set_animation_spin(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration) {
 
     if (!m_is_animation_running || m_current_animation != CURRENT_ANIMATION_SPINNING) {
-        Serial.println("[LEDStrip] Start spinning");
+        Serial.println("[LEDStrip] Start animation (Spin)");
         m_is_animation_running = true;
         m_current_animation = CURRENT_ANIMATION_SPINNING;
         m_animation_start_time = millis();
-        animation_spinning_set_array(hsv, brightness_min, brightness_max);
+        animation_spin_set_array(hsv, brightness_min, brightness_max);
     }
 
     int brightness_difference = brightness_max - brightness_min;
@@ -76,8 +76,8 @@ bool LedStrip::set_spinning_animation(CHSV hsv, uint8_t brightness_min, uint8_t 
     int matching_index = map(animation_percent, 0, 100, 0, brightness_difference-1);
 
     for(int i = 0; i<NB_LEDS; i++){
-        animation_spinning_set_action(i, matching_index, brightness_min, brightness_max);
-        animation_spinning_set_pixel_color(hsv, i, matching_index, brightness_min, brightness_max);
+        animation_spin_set_action(i, matching_index, brightness_min, brightness_max);
+        animation_spin_set_pixel_color(hsv, i, matching_index, brightness_min, brightness_max);
     }
 
     FastLED.show();
@@ -85,7 +85,7 @@ bool LedStrip::set_spinning_animation(CHSV hsv, uint8_t brightness_min, uint8_t 
     if (millis() > m_animation_start_time + animation_duration) {
         m_is_animation_running = false;
         m_current_animation = CURRENT_ANIMATION_NONE;
-        Serial.println("[LedStrip] End spinning");
+        Serial.println("[LedStrip] End animation (Spin)");
         return true;
     } else {
         return false;
@@ -93,7 +93,7 @@ bool LedStrip::set_spinning_animation(CHSV hsv, uint8_t brightness_min, uint8_t 
 }
 
 
-void LedStrip::animation_spinning_set_array(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max) {
+void LedStrip::animation_spin_set_array(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max) {
     int center_index = (NB_LEDS/2) - 1;
 
     for(int i = 0; i<NB_LEDS; i++){
@@ -119,27 +119,27 @@ void LedStrip::animation_spinning_set_array(CHSV hsv, uint8_t brightness_min, ui
 }
 
 
-uint16_t LedStrip::animation_spinning_substract_from_seed(uint16_t current_pixel, uint8_t current_index) {
+uint16_t LedStrip::animation_spin_substract_from_seed(uint16_t current_pixel, uint8_t current_index) {
     return m_spinning_seed[current_pixel] - (2*current_index);
 }
 
 
-uint16_t LedStrip::animation_spinning_add_from_seed(uint16_t current_pixel, uint8_t current_index) {
+uint16_t LedStrip::animation_spin_add_from_seed(uint16_t current_pixel, uint8_t current_index) {
     return m_spinning_seed[current_pixel] + (2*current_index);
 }
 
 
-uint16_t LedStrip::animation_spinning_substract(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
+uint16_t LedStrip::animation_spin_substract(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
     return brightness_max - ( 2 * ( current_index - m_spinning_min_max_index[current_pixel] ) );
 }
 
 
-uint16_t LedStrip::animation_spinning_add(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
+uint16_t LedStrip::animation_spin_add(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max) {
     return brightness_min + ( 2 * ( current_index - m_spinning_min_max_index[current_pixel] ) );
 }
 
 
-void LedStrip::animation_spinning_set_min_max_index(uint16_t current_pixel, uint8_t current_index){
+void LedStrip::animation_spin_set_min_max_index(uint16_t current_pixel, uint8_t current_index){
     if(current_index - 1 < 0){
         m_spinning_min_max_index[current_pixel] = 0;
     } else {
@@ -148,57 +148,57 @@ void LedStrip::animation_spinning_set_min_max_index(uint16_t current_pixel, uint
 }
 
 
-void LedStrip::animation_spinning_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
+void LedStrip::animation_spin_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
 
     if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED) &&
-       (animation_spinning_substract_from_seed(current_pixel, current_index) < brightness_min)) 
+       (animation_spin_substract_from_seed(current_pixel, current_index) < brightness_min)) 
     {
         m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_ADD;
-        animation_spinning_set_min_max_index(current_pixel, current_index);
+        animation_spin_set_min_max_index(current_pixel, current_index);
 
     } 
     else if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_ADD_FROM_SEED) &&
-            (animation_spinning_add_from_seed(current_pixel, current_index) > brightness_max))
+            (animation_spin_add_from_seed(current_pixel, current_index) > brightness_max))
     {
         m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_SUBSTRACT;
-        animation_spinning_set_min_max_index(current_pixel, current_index);
+        animation_spin_set_min_max_index(current_pixel, current_index);
 
     } 
     else if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_SUBSTRACT) && 
-            (animation_spinning_substract(current_pixel, current_index, brightness_min, brightness_max) < brightness_min))
+            (animation_spin_substract(current_pixel, current_index, brightness_min, brightness_max) < brightness_min))
     {
         m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_ADD;
-        animation_spinning_set_min_max_index(current_pixel, current_index);
+        animation_spin_set_min_max_index(current_pixel, current_index);
 
     } 
     else if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_ADD) && 
-            (animation_spinning_add(current_pixel, current_index, brightness_min, brightness_max) > brightness_max)) 
+            (animation_spin_add(current_pixel, current_index, brightness_min, brightness_max) > brightness_max)) 
     {
         m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_SUBSTRACT;
-        animation_spinning_set_min_max_index(current_pixel, current_index);
+        animation_spin_set_min_max_index(current_pixel, current_index);
     }
 }
 
 
-void LedStrip::animation_spinning_set_pixel_color(CHSV hsv, uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
+void LedStrip::animation_spin_set_pixel_color(CHSV hsv, uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
         int brightness_target;
 
         switch (m_spinning_action[current_pixel])
         {
             case ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED:
-                brightness_target = animation_spinning_substract_from_seed(current_pixel, current_index);
+                brightness_target = animation_spin_substract_from_seed(current_pixel, current_index);
                 break;
 
             case ANIMATION_SPINNING_STATE_ADD_FROM_SEED:
-                brightness_target = animation_spinning_add_from_seed(current_pixel, current_index);
+                brightness_target = animation_spin_add_from_seed(current_pixel, current_index);
                 break;
 
             case ANIMATION_SPINNING_STATE_SUBSTRACT:
-                brightness_target = animation_spinning_substract(current_pixel, current_index, brightness_min, brightness_max);
+                brightness_target = animation_spin_substract(current_pixel, current_index, brightness_min, brightness_max);
                 break;
 
             case ANIMATION_SPINNING_STATE_ADD:
-                brightness_target = animation_spinning_add(current_pixel, current_index, brightness_min, brightness_max);
+                brightness_target = animation_spin_add(current_pixel, current_index, brightness_min, brightness_max);
                 break;
 
             default:

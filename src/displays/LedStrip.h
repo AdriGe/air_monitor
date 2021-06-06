@@ -22,8 +22,8 @@ class LedStrip {
         void set_color(uint8_t red, uint8_t green, uint8_t blue);
         void set_brightness(uint8_t brightness);
         void set_color_from_aqi(int aqi);
-        bool set_breathing_animation(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration, unsigned long animation_duration_low_static);
-        bool set_spinning_animation(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration);
+        bool set_animation_breath(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration, unsigned long animation_duration_low_static);
+        bool set_animation_spin(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration);
 
     private:
         CRGB m_leds[NB_LEDS];
@@ -35,14 +35,14 @@ class LedStrip {
         uint8_t m_spinning_action[NB_LEDS];
         uint8_t m_spinning_min_max_index[NB_LEDS];
 
-        void animation_spinning_set_array(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness);
-        uint16_t animation_spinning_substract_from_seed(uint16_t current_pixel, uint8_t current_index);
-        uint16_t animation_spinning_add_from_seed(uint16_t current_pixel, uint8_t current_index);
-        uint16_t animation_spinning_substract(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
-        uint16_t animation_spinning_add(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
-        void animation_spinning_set_min_max_index(uint16_t current_pixel, uint8_t current_index);
-        void animation_spinning_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
-        void animation_spinning_set_pixel_color(CHSV hsv, uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
+        void animation_spin_set_array(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness);
+        uint16_t animation_spin_substract_from_seed(uint16_t current_pixel, uint8_t current_index);
+        uint16_t animation_spin_add_from_seed(uint16_t current_pixel, uint8_t current_index);
+        uint16_t animation_spin_substract(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
+        uint16_t animation_spin_add(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
+        void animation_spin_set_min_max_index(uint16_t current_pixel, uint8_t current_index);
+        void animation_spin_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
+        void animation_spin_set_pixel_color(CHSV hsv, uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
 };
 
 #endif
