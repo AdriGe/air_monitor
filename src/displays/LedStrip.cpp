@@ -137,33 +137,33 @@ void LedStrip::animation_spinning_set_min_max_index(uint16_t current_pixel, uint
 
 
 void LedStrip::animation_spinning_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max){
-    if(m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED) {
 
-        if(animation_spinning_substract_from_seed(current_pixel, current_index) < brightness_min){
-            m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_ADD;
-            animation_spinning_set_min_max_index(current_pixel, current_index);
-        }
+    if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED) &&
+       (animation_spinning_substract_from_seed(current_pixel, current_index) < brightness_min)) 
+    {
+        m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_ADD;
+        animation_spinning_set_min_max_index(current_pixel, current_index);
 
-    } else if(m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_ADD_FROM_SEED){
+    } 
+    else if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_ADD_FROM_SEED) &&
+            (animation_spinning_add_from_seed(current_pixel, current_index) > brightness_max))
+    {
+        m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_SUBSTRACT;
+        animation_spinning_set_min_max_index(current_pixel, current_index);
 
-        if(animation_spinning_add_from_seed(current_pixel, current_index) > brightness_max){
-            m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_SUBSTRACT;
-            animation_spinning_set_min_max_index(current_pixel, current_index);
-        }
+    } 
+    else if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_SUBSTRACT) && 
+            (animation_spinning_substract(current_pixel, current_index, brightness_min, brightness_max) < brightness_min))
+    {
+        m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_ADD;
+        animation_spinning_set_min_max_index(current_pixel, current_index);
 
-    } else if(m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_SUBSTRACT) {
-
-        if(animation_spinning_substract(current_pixel, current_index, brightness_min, brightness_max) < brightness_min) {
-            m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_ADD;
-            animation_spinning_set_min_max_index(current_pixel, current_index);
-        }
-
-    } else if(m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_ADD) {
-
-        if(animation_spinning_add(current_pixel, current_index, brightness_min, brightness_max) > brightness_max) {
-            m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_SUBSTRACT;
-            animation_spinning_set_min_max_index(current_pixel, current_index);
-        }
+    } 
+    else if((m_spinning_action[current_pixel] == ANIMATION_SPINNING_STATE_ADD) && 
+            (animation_spinning_add(current_pixel, current_index, brightness_min, brightness_max) > brightness_max)) 
+    {
+        m_spinning_action[current_pixel] = ANIMATION_SPINNING_STATE_SUBSTRACT;
+        animation_spinning_set_min_max_index(current_pixel, current_index);
     }
 }
 
