@@ -22,7 +22,6 @@ class LedStrip {
         void set_effect_breathing_delay(int delay);
         void set_effect_breath();
         bool set_spinning_effect(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness, unsigned long animation_duration);
-        void set_spinning_array(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness);
 
     private:
         CRGB m_leds[NB_LEDS];
@@ -31,17 +30,19 @@ class LedStrip {
         int m_effect_breath_delay;
         bool m_is_animation_running;
         unsigned long m_animation_start_time;
+        
         uint8_t m_spinning_seed[NB_LEDS];
         uint8_t m_spinning_action[NB_LEDS];
         uint8_t m_spinning_min_max_index[NB_LEDS];
 
+        void animation_spinning_set_array(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness);
         uint16_t animation_spinning_substract_from_seed(uint16_t current_pixel, uint8_t current_index);
         uint16_t animation_spinning_add_from_seed(uint16_t current_pixel, uint8_t current_index);
         uint16_t animation_spinning_substract(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
         uint16_t animation_spinning_add(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
         void animation_spinning_set_min_max_index(uint16_t current_pixel, uint8_t current_index);
         void animation_spinning_set_action(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
-        void animation_spinning_set_pixel_color(uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
+        void animation_spinning_set_pixel_color(CHSV hsv, uint16_t current_pixel, uint8_t current_index, uint8_t brightness_min, uint8_t brightness_max);
 };
 
 #endif
