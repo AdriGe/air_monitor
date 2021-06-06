@@ -7,10 +7,10 @@
 
 const int DATA_PIN = 3;
 const int NB_LEDS = 10;
-const uint8_t ANIMATION_SPINNING_STATE_SUBSTRACT_FROM_SEED = 0;
-const uint8_t ANIMATION_SPINNING_STATE_SUBSTRACT = 1;
-const uint8_t ANIMATION_SPINNING_STATE_ADD_FROM_SEED = 2;
-const uint8_t ANIMATION_SPINNING_STATE_ADD = 3;
+const uint8_t ANIMATION_SPIN_STATE_SUBSTRACT_FROM_SEED = 0;
+const uint8_t ANIMATION_SPIN_STATE_SUBSTRACT = 1;
+const uint8_t ANIMATION_SPIN_STATE_ADD_FROM_SEED = 2;
+const uint8_t ANIMATION_SPIN_STATE_ADD = 3;
 const uint8_t CURRENT_ANIMATION_NONE = 0;
 const uint8_t CURRENT_ANIMATION_SPINNING = 1;
 const uint8_t CURRENT_ANIMATION_BREATHING = 2;
@@ -31,9 +31,9 @@ class LedStrip {
         uint8_t m_current_animation;
         unsigned long m_animation_start_time;
 
-        uint8_t m_spinning_seed[NB_LEDS];
-        uint8_t m_spinning_action[NB_LEDS];
-        uint8_t m_spinning_min_max_index[NB_LEDS];
+        uint8_t m_spin_seed[NB_LEDS];
+        uint8_t m_spin_action[NB_LEDS];
+        uint8_t m_spin_min_max_index[NB_LEDS];
 
         void animation_spin_set_array(CHSV hsv, uint8_t min_brightness, uint8_t max_brightness);
         uint16_t animation_spin_substract_from_seed(uint16_t current_pixel, uint8_t current_index);
