@@ -31,17 +31,25 @@ void LedStrip::set_brightness(uint8_t brightness) {
     FastLED.setBrightness(brightness);
 }
 
-void LedStrip::set_color_from_aqi(int aqi) {
-    Serial.print("[LedStrip] Change color (AQI = ");
-    Serial.print(aqi);
-    Serial.println(")");
-    
-    if      (aqi == 1)  { set_color(0,255,0); }
-    else if (aqi == 2)  { set_color(191,255,0); }
-    else if (aqi == 3)  { set_color(255,255,0); }
-    else if (aqi == 4)  { set_color(255,153,0); }
-    else if (aqi == 5)  { set_color(255,0,0); }
-    else                { set_color(255,255,255); }
+
+void LedStrip::loop(AllSensors* p_all_sensors) {
+    uint16_t aqi = p_all_sensors->get_aqi();
+    CHSV color_aqi = get_color_from_aqi(aqi);
+
+    if      (aqi>AQI_VERY_HIGH_MIN) { set_animation_spin(color_aqi, 50, 255, 3000); }
+    else if (aqi>AQI_HIGH_MIN)      { set_animation_spin(color_aqi, 50, 255, 3000); }
+    else if (aqi>AQI_MEDIUM_MIN)    { set_animation_breath(color_aqi, 0, 255, 5000, 1000); }
+    else if (aqi>AQI_LOW_MIN)       { set_animation_breath(color_aqi, 0, 255, 5000, 1000); }
+    else                            { set_animation_breath(color_aqi, 0, 255, 5000, 1000); }
+}
+
+CHSV LedStrip::get_color_from_aqi(uint16_t aqi) {
+
+    if      (aqi>AQI_VERY_HIGH_MIN) { return CHSV(HUE_PURPLE, 255, 255); }
+    else if (aqi>AQI_HIGH_MIN)      { return CHSV(HUE_RED, 255, 255); }
+    else if (aqi>AQI_MEDIUM_MIN)    { return CHSV(HUE_ORANGE, 255, 255); }
+    else if (aqi>AQI_LOW_MIN)       { return CHSV(HUE_YELLOW, 255, 255); }
+    else                            { return CHSV(HUE_GREEN, 255, 255); }
 }
 
 

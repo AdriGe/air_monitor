@@ -1,6 +1,8 @@
 #include <FS.h>
 #include <Arduino.h>
 
+#include <config/config.h>
+
 #include <sensors/AllSensors.h>
 #include <sensors/SensorPMSA003.h>
 #include <sensors/SensorSGP30.h>
@@ -12,8 +14,6 @@
 
 #include <displays/LedStrip.h>
 #include <displays/Oled.h>
-
-#include <config/config.h>
 
 
 SensorPMSA003 pms(PMS_PIN_TX, PMS_PIN_RX, SENSOR_UPDATE_INTERVAL);
@@ -71,12 +71,8 @@ void loop() {
     // Handle Oled display
     oled.loop(&all_sensors, 2000, 2000, 500, 200, 2000, 3000, 500, 50);
 
-    // Update display if new values from sensors
-    if (is_new_sensor_values) {
-        // Setting LED Strip color
-        int aqi = all_sensors.get_aqi();
-        //led_strip.set_color_from_aqi(aqi);
-    }
+    // Handle Leds strip
+    led_strip.loop(&all_sensors);
 
     // Handle MQTT
     easy_mqtt_manager->loop();

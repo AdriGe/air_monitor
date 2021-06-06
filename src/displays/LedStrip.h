@@ -5,6 +5,7 @@
 #include <FastLED.h>
 #include <math.h>
 #include <config/config.h>
+#include <sensors/AllSensors.h>
 
 #define ANIMATION_SPIN_STATE_SUBSTRACT_FROM_SEED 0
 #define ANIMATION_SPIN_STATE_SUBSTRACT 1
@@ -14,13 +15,15 @@
 #define CURRENT_ANIMATION_SPINNING 1
 #define CURRENT_ANIMATION_BREATHING 2
 
+
 class LedStrip {
     public:
         LedStrip();
         void set_color(CRGB color);
         void set_color(uint8_t red, uint8_t green, uint8_t blue);
         void set_brightness(uint8_t brightness);
-        void set_color_from_aqi(int aqi);
+        void loop(AllSensors* p_all_sensors);
+        CHSV get_color_from_aqi(uint16_t aqi);
         bool set_animation_breath(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration, unsigned long animation_duration_low_static);
         bool set_animation_spin(CHSV hsv, uint8_t brightness_min, uint8_t brightness_max, unsigned long animation_duration);
 
