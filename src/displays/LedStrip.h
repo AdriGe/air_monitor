@@ -29,6 +29,9 @@ class LedStrip {
 
     private:
         CRGB m_leds[NB_LEDS];
+
+        CRGBPalette16 m_color_palette;
+
         bool m_is_animation_running;
         uint8_t m_current_animation;
         unsigned long m_animation_start_time;

@@ -7,6 +7,25 @@ LedStrip::LedStrip()
     FastLED.addLeds<NEOPIXEL, LED_STRIP_DATA_PIN>(m_leds, NB_LEDS);
     m_is_animation_running = false;
     m_current_animation = CURRENT_ANIMATION_NONE;
+
+    m_color_palette = CRGBPalette16(
+        CRGB(0,229,188),
+        CRGB(84,229,134),
+        CRGB(167,230,80),
+        CRGB(251,230,26),
+        CRGB(252,206,20),
+        CRGB(253,183,14),
+        CRGB(254,159,8),
+        CRGB(255,135,2),
+        CRGB(250,119,21),
+        CRGB(244,103,40),
+        CRGB(239,86,59),
+        CRGB(233,70,78),
+        CRGB(222,70,117),
+        CRGB(212,69,156),
+        CRGB(201,69,195),
+        CRGB(190,68,234)
+    );
 }
 
 
@@ -44,12 +63,29 @@ void LedStrip::loop(AllSensors* p_all_sensors) {
 }
 
 CHSV LedStrip::get_color_from_aqi(uint16_t aqi) {
+    // HSV -> RGB
+    //CHSV my_chsv(34, 255, 255);
+    //CRGB my_crgb;
+    //hsv2rgb_rainbow(my_chsv, my_crgb);
+    //
+    // RGB -> HSV
+    //CRGB my_crgb(128, 128, 128);
+    //CHSV my_hsv = rgb2hsv_approximate(my_crgb);
+    //
+    // Get Gradient
+    //https://mistic100.github.io/tinygradient/
+    //https://github.com/FastLED/FastLED/wiki/Gradient-color-palettes
 
-    if      (aqi>AQI_VERY_HIGH_MIN) { return CHSV(HUE_PURPLE, 255, 255); }
-    else if (aqi>AQI_HIGH_MIN)      { return CHSV(HUE_RED, 255, 255); }
-    else if (aqi>AQI_MEDIUM_MIN)    { return CHSV(HUE_ORANGE, 255, 255); }
-    else if (aqi>AQI_LOW_MIN)       { return CHSV(HUE_YELLOW, 255, 255); }
-    else                            { return CHSV(HUE_GREEN, 255, 255); }
+    CRGB color_palette_index = map(aqi, AQI_VERY_LOW_MIN, AQI_VERY_HIGH_MIN, 0, 15);
+    CHSV aqi_color = rgb2hsv_approximate(m_color_palette[color_palette_index]);
+    return aqi_color;
+
+
+    //if      (aqi>AQI_VERY_HIGH_MIN) { return CHSV(HUE_PURPLE, 255, 255); }
+    //else if (aqi>AQI_HIGH_MIN)      { return CHSV(HUE_RED, 255, 255); }
+    //else if (aqi>AQI_MEDIUM_MIN)    { return CHSV(HUE_ORANGE, 255, 255); }
+    //else if (aqi>AQI_LOW_MIN)       { return CHSV(HUE_YELLOW, 255, 255); }
+    //else                            { return CHSV(HUE_GREEN, 255, 255); }
 }
 
 
